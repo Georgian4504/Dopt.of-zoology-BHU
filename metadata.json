@@ -1,0 +1,6 @@
+{
+  "name": "Dept. of Zoology Study Materials",
+  "description": "Student resource portal and academic repository for Banaras Hindu University MSc Zoology with verified Supabase storage upload and public retrieval.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
