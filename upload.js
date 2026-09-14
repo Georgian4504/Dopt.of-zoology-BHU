@@ -3,11 +3,11 @@
  * Supabase File Upload & Storage Management
  * 
  * Hosting: GitHub Pages
- * Backend: Supabase Storage + Database
+ * Backend: Supabase Storage ('study-materials') + Database Table ('materials')
  */
 
 // Validation Constants
-const ALLOWED_EXTENSIONS = ['pdf', 'ppt', 'pptx', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
+const ALLOWED_EXTENSIONS = ['pdf', 'ppt', 'pptx', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'webp'];
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
 
 /**
@@ -89,7 +89,7 @@ function sanitizeOriginalFilename(originalName) {
 
 /**
  * Generate standard storage path:
- * semester-1/ZOO101/1726318822_Biochemistry.pdf
+ * semester-1/ZOM101/1726318822_Biochemistry.pdf
  */
 function generateStoragePath(semester, subject, originalFilename) {
   const semFolder = formatSemesterPath(semester);
@@ -241,7 +241,7 @@ async function handleStudyMaterialUpload(formOrEvent) {
   }
 
   // 2. Generate destination path in Supabase Storage
-  // Format: semester-1/ZOO101/1726318822_Biochemistry.pdf
+  // Format: semester-1/ZOM101/1726318822_Biochemistry.pdf
   const filePath = generateStoragePath(semester, subject, selectedFile.name);
   const bucketName = window.SUPABASE_STORAGE_BUCKET || 'study-materials';
 
@@ -249,8 +249,8 @@ async function handleStudyMaterialUpload(formOrEvent) {
   setUploadStatusUI('uploading', `Uploading ${selectedFile.name} to "${bucketName}" storage...`);
 
   try {
-    // Preserve MIME type, enforce upsert: false
-    const mimeType = selectedFile.type || 'application/octet-stream';
+    // Enforce MIME type, upload to Supabase Storage
+    const mimeType = selectedFile.type || 'application/pdf';
     const { data: storageUploadData, error: storageError } = await client.storage
       .from(bucketName)
       .upload(filePath, selectedFile, {
@@ -259,13 +259,13 @@ async function handleStudyMaterialUpload(formOrEvent) {
       });
 
     if (storageError) {
-      console.error(storageError);
-      alert(storageError.message);
+      console.error('[Supabase Storage Upload Error]:', storageError);
+      alert('Storage upload failed: ' + storageError.message);
       setUploadStatusUI('failed', storageError.message);
       return;
     }
 
-    // 4. Retrieve Public URL
+    // 4. Retrieve Public URL from Supabase Storage
     const { data: publicUrlData } = client.storage
       .from(bucketName)
       .getPublicUrl(filePath);
@@ -280,7 +280,10 @@ async function handleStudyMaterialUpload(formOrEvent) {
       return;
     }
 
-    // 5. Save Metadata into table 'materials'
+    // 5. Prepare Metadata Payload
+    // CRITICAL: Only write columns that strictly exist in the Supabase 'materials' table schema cache.
+    // Columns that do NOT exist: 'subject', 'uploader_name', 'file_path', 'file_size', 'file_type', 'public_url'.
+    // Canonical existing columns: 'id', 'title', 'paper', 'semester', 'topic', 'type', 'student', 'date', 'description', 'file', 'image', 'views', 'likes'.
     const isImageFile = selectedFile.type.startsWith('image/') || 
       /\.(jpg|jpeg|png|webp)$/i.test(selectedFile.name);
 
@@ -290,56 +293,95 @@ async function handleStudyMaterialUpload(formOrEvent) {
       ? crypto.randomUUID() 
       : 'mat_' + Date.now();
 
-    const metadataRecord = {
+    const insertPayload = {
       id: generatedId,
       title: title,
-      subject: subject,
-      semester: semester,
-      uploader_name: uploaderName,
-      file_path: filePath,
-      public_url: publicUrl,
-      file_type: materialType,
-      file_size: selectedFile.size,
-      created_at: createdIso,
-
-      // Complementary columns for complete frontend bookshelf compatibility
-      paper: subject,
-      topic: topic,
-      type: materialType,
-      student: uploaderName,
-      date: todayDate,
+      paper: subject,        // Canonical column for paper code (e.g. "ZOM 101")
+      semester: semester,    // e.g. "sem1"
+      topic: topic,          // e.g. "Fish Morphology", "Protozoa"
+      type: materialType,    // e.g. "PDF", "Class Notes"
+      student: uploaderName, // Canonical column for scholar name
+      date: todayDate,       // e.g. "2026-09-14"
       description: description,
-      file: publicUrl,
+      file: publicUrl,       // Canonical column storing public URL
       image: isImageFile ? publicUrl : '',
-      views: 1,
+      views: 0,
       likes: 0
     };
 
     setUploadStatusUI('uploading', 'Saving metadata in materials database...');
 
-    const { data: insertData, error: insertError } = await client
-      .from(window.SUPABASE_MATERIALS_TABLE || 'materials')
-      .insert([metadataRecord]);
+    // 6. Execute Supabase Insert with PGRST204 Schema Cache auto-recovery
+    let payloadToInsert = { ...insertPayload };
+    let insertError = null;
+    let insertSuccess = false;
 
-    if (insertError) {
-      console.error(insertError);
-      alert(insertError.message);
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const { data: insertData, error: err } = await client
+        .from(window.SUPABASE_MATERIALS_TABLE || 'materials')
+        .insert([payloadToInsert]);
+
+      if (!err) {
+        insertSuccess = true;
+        insertError = null;
+        break;
+      }
+
+      insertError = err;
+
+      // Check if error is PGRST204: column not found in schema cache
+      const unmappedColMatch = err.message && err.message.match(/Could not find the '([^']+)' column/i);
+      if (unmappedColMatch && unmappedColMatch[1] && payloadToInsert[unmappedColMatch[1]] !== undefined) {
+        console.warn(`[Supabase Upload] Removing column "${unmappedColMatch[1]}" from payload (not in schema cache) and retrying...`);
+        delete payloadToInsert[unmappedColMatch[1]];
+        continue;
+      }
+
+      // Non-recoverable error
+      break;
+    }
+
+    if (!insertSuccess && insertError) {
+      console.error('[Supabase Insert Error]:', insertError);
+      alert('Database Insert Failed: ' + insertError.message);
       setUploadStatusUI('failed', `Database Insert Failed: ${insertError.message}`);
       return;
     }
 
-    // 6. Success handling
+    // 7. Success Handling & Bookshelf State Update
     setUploadStatusUI('success', `"${title}" is published and live on the bookshelf!`);
     if (typeof showToast === 'function') {
       showToast(`✓ Material uploaded & published to ${topic}!`);
     }
 
+    // Prepare full normalized representation for in-memory bookshelf UI
+    const frontendRecord = {
+      id: generatedId,
+      title: title,
+      paper: subject,
+      subject: subject,
+      semester: semester,
+      topic: topic,
+      type: materialType,
+      file_type: materialType,
+      student: uploaderName,
+      uploader_name: uploaderName,
+      date: todayDate,
+      description: description,
+      file: publicUrl,
+      public_url: publicUrl,
+      image: isImageFile ? publicUrl : '',
+      views: 0,
+      likes: 0,
+      created_at: createdIso
+    };
+
     // Immediately push to active website materials list and re-render
     if (Array.isArray(window.allMaterials)) {
-      window.allMaterials.unshift(metadataRecord);
+      window.allMaterials.unshift(frontendRecord);
     }
     if (Array.isArray(window.userMaterials)) {
-      window.userMaterials.unshift(metadataRecord);
+      window.userMaterials.unshift(frontendRecord);
       if (typeof saveUserMaterials === 'function') {
         saveUserMaterials();
       }
@@ -347,6 +389,10 @@ async function handleStudyMaterialUpload(formOrEvent) {
 
     if (typeof rerenderShelves === 'function') {
       rerenderShelves();
+    }
+
+    if (typeof updateStatsDashboard === 'function') {
+      updateStatsDashboard();
     }
 
     // Clean up modal state
@@ -373,7 +419,7 @@ async function handleStudyMaterialUpload(formOrEvent) {
     }, 1200);
 
   } catch (unhandledErr) {
-    console.error(unhandledErr);
+    console.error('[Unhandled Upload Error]:', unhandledErr);
     alert(unhandledErr.message || 'An unhandled error occurred during upload.');
     setUploadStatusUI('failed', unhandledErr.message);
   }

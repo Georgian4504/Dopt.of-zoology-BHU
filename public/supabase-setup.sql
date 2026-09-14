@@ -27,13 +27,12 @@ on conflict (id) do update set
   file_size_limit = 26214400;
 
 -- 2. Storage Objects RLS Policies for 'study-materials'
--- Drop existing policies if any exist to prevent duplicate errors
 drop policy if exists "Public Access to study-materials" on storage.objects;
 drop policy if exists "Public Uploads to study-materials" on storage.objects;
 drop policy if exists "Public Updates to study-materials" on storage.objects;
 drop policy if exists "Public Deletes on study-materials" on storage.objects;
 
--- Allow anyone (public / anonymous / students) to read & download files from the bucket
+-- Allow anyone to read & download files from the bucket
 create policy "Public Access to study-materials"
   on storage.objects for select
   using ( bucket_id = 'study-materials' );
@@ -43,41 +42,45 @@ create policy "Public Uploads to study-materials"
   on storage.objects for insert
   with check ( bucket_id = 'study-materials' );
 
--- Allow update if needed
 create policy "Public Updates to study-materials"
   on storage.objects for update
   using ( bucket_id = 'study-materials' );
 
--- Allow deletion if needed
-create policy "Public Deletes on study-materials"
-  on storage.objects for delete
+create policy "Public Deletes on storage study-materials" on storage.objects for delete
   using ( bucket_id = 'study-materials' );
 
--- 3. Create 'materials' Table with all required metadata columns
+-- 3. Create 'materials' Table with exact canonical column names
 create table if not exists public.materials (
   id text primary key default gen_random_uuid()::text,
   title text not null,
-  subject text not null,
+  paper text not null,
   semester text not null,
-  uploader_name text not null,
-  file_path text not null,
-  public_url text not null,
-  file_type text not null,
-  file_size bigint not null default 0,
-  created_at timestamptz not null default now(),
-
-  -- Frontend bookshelf compatibility columns
-  paper text,
-  topic text default 'General',
-  type text,
-  student text,
-  date text,
-  description text,
-  file text,
-  image text,
-  views integer default 1,
-  likes integer default 0
+  topic text not null default 'General',
+  type text not null default 'PDF',
+  student text not null,
+  date text not null default to_char(now(), 'YYYY-MM-DD'),
+  description text default '',
+  file text default '',
+  image text default '',
+  views integer default 0,
+  likes integer default 0,
+  created_at timestamptz not null default now()
 );
+
+-- Ensure columns exist in case table was pre-existing
+alter table public.materials add column if not exists title text;
+alter table public.materials add column if not exists paper text;
+alter table public.materials add column if not exists semester text;
+alter table public.materials add column if not exists topic text default 'General';
+alter table public.materials add column if not exists type text default 'PDF';
+alter table public.materials add column if not exists student text;
+alter table public.materials add column if not exists date text default to_char(now(), 'YYYY-MM-DD');
+alter table public.materials add column if not exists description text default '';
+alter table public.materials add column if not exists file text default '';
+alter table public.materials add column if not exists image text default '';
+alter table public.materials add column if not exists views integer default 0;
+alter table public.materials add column if not exists likes integer default 0;
+alter table public.materials add column if not exists created_at timestamptz default now();
 
 -- Enable RLS on 'materials' table
 alter table public.materials enable row level security;

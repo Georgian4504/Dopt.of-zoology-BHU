@@ -983,31 +983,38 @@ create policy "Public Deletes on study-materials"
   on storage.objects for delete
   using ( bucket_id = 'study-materials' );
 
--- 3. Create 'materials' Table with all required metadata columns
+-- 3. Create 'materials' Table with exact canonical column names
 create table if not exists public.materials (
   id text primary key default gen_random_uuid()::text,
   title text not null,
-  subject text not null,
+  paper text not null,
   semester text not null,
-  uploader_name text not null,
-  file_path text not null,
-  public_url text not null,
-  file_type text not null,
-  file_size bigint not null default 0,
-  created_at timestamptz not null default now(),
-
-  -- Frontend bookshelf compatibility columns
-  paper text,
-  topic text default 'General',
-  type text,
-  student text,
-  date text,
-  description text,
-  file text,
-  image text,
-  views integer default 1,
-  likes integer default 0
+  topic text not null default 'General',
+  type text not null default 'PDF',
+  student text not null,
+  date text not null default to_char(now(), 'YYYY-MM-DD'),
+  description text default '',
+  file text default '',
+  image text default '',
+  views integer default 0,
+  likes integer default 0,
+  created_at timestamptz not null default now()
 );
+
+-- Ensure all columns exist in case table was pre-existing
+alter table public.materials add column if not exists title text;
+alter table public.materials add column if not exists paper text;
+alter table public.materials add column if not exists semester text;
+alter table public.materials add column if not exists topic text default 'General';
+alter table public.materials add column if not exists type text default 'PDF';
+alter table public.materials add column if not exists student text;
+alter table public.materials add column if not exists date text default to_char(now(), 'YYYY-MM-DD');
+alter table public.materials add column if not exists description text default '';
+alter table public.materials add column if not exists file text default '';
+alter table public.materials add column if not exists image text default '';
+alter table public.materials add column if not exists views integer default 0;
+alter table public.materials add column if not exists likes integer default 0;
+alter table public.materials add column if not exists created_at timestamptz default now();
 
 -- Enable RLS on 'materials' table
 alter table public.materials enable row level security;
@@ -1133,9 +1140,9 @@ create policy "Allow public insert on visitors"
 
   function normalizeMaterial(item) {
     if (!item) return null;
-    const paperVal = item.subject || item.paper || "General";
-    const uploaderVal = item.uploader_name || item.student || "Scholar";
-    const fileUrl = item.public_url || item.file || "";
+    const paperVal = item.paper || item.subject || "General";
+    const uploaderVal = item.student || item.uploader_name || "Scholar";
+    const fileUrl = item.file || item.public_url || item.file_url || "";
     const isImage = (item.file_type && item.file_type.toLowerCase().includes("photo")) ||
                     (item.type && item.type.toLowerCase().includes("photo")) ||
                     /\.(jpg|jpeg|png|webp)$/i.test(fileUrl);
@@ -2024,6 +2031,18 @@ create policy "Allow public insert on visitors"
       container.innerHTML = `<img src="${escapeAttr(item.file)}" alt="${escapeAttr(item.title)}" style="width:100%; max-height:48vh; object-fit:contain; border-radius:12px; display:block; margin:0 auto;">`;
     } else if (item.file && item.file.startsWith('data:application/pdf')) {
       container.innerHTML = `<iframe src="${item.file}" style="width:100%; height:45vh; border:none; border-radius:12px;"></iframe>`;
+    } else if (item.file && (item.file.toLowerCase().includes('.pdf') || item.type === 'PDF' || (item.file.includes('study-materials') && !item.file.match(/\.(jpe?g|png|webp)$/i)))) {
+      container.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <iframe src="${escapeAttr(item.file)}" style="width:100%; height:46vh; border:none; border-radius:12px; background:#f8fafc;"></iframe>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; padding:10px 14px; background:var(--parchment); border-radius:10px; font-size:0.85rem;">
+            <span>📄 PDF Document hosted on Supabase Storage</span>
+            <a href="${escapeAttr(item.file)}" target="_blank" rel="noopener" class="clay-btn small primary" style="text-decoration:none;">
+              <span>Open in Full Tab ↗</span>
+            </a>
+          </div>
+        </div>
+      `;
     } else {
       container.innerHTML = `
         <div style="background:var(--parchment); border-radius:14px; padding:20px; font-size:0.95rem; color:var(--ink);">
@@ -2069,9 +2088,23 @@ create policy "Allow public insert on visitors"
     const item = allMaterials.find(m => m.id === id);
     if (!item) return;
 
+    if (item.file && (item.file.startsWith('http') || item.file.startsWith('blob:'))) {
+      const link = document.createElement('a');
+      link.href = item.file;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      const isPdf = item.file.toLowerCase().includes('.pdf') || item.type === 'PDF';
+      link.download = `${item.title.replace(/[^a-zA-Z0-9_-]/g, '_')}${isPdf ? '.pdf' : ''}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`Downloading ${item.title}`);
+      return;
+    }
+
     const link = document.createElement('a');
     link.href = item.file || ('data:text/plain;charset=utf-8,' + encodeURIComponent(`${item.title}\n\n${item.description}\nUploaded by: ${item.student}`));
-    link.download = `${item.title.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+    link.download = `${item.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

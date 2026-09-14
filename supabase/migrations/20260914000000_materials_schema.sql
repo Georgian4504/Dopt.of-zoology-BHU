@@ -1,55 +1,9 @@
 -- ====================================================================
 -- Department of Zoology — Banaras Hindu University
--- Supabase Storage & Database Setup Script
--- Project Hosting: GitHub Pages
+-- Supabase Migration: Fix Materials Schema & Column Alignment
 -- ====================================================================
 
--- 1. Create 'study-materials' Storage Bucket (Public with 25MB limit)
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'study-materials',
-  'study-materials',
-  true,
-  26214400, -- 25 MB in bytes
-  array[
-    'application/pdf',
-    'application/vnd.ms-powerpoint',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'image/jpeg',
-    'image/png',
-    'image/webp'
-  ]
-)
-on conflict (id) do update set
-  public = true,
-  file_size_limit = 26214400;
-
--- 2. Storage Objects RLS Policies for 'study-materials'
-drop policy if exists "Public Access to study-materials" on storage.objects;
-drop policy if exists "Public Uploads to study-materials" on storage.objects;
-drop policy if exists "Public Updates to study-materials" on storage.objects;
-drop policy if exists "Public Deletes on study-materials" on storage.objects;
-
--- Allow anyone to read & download files from the bucket
-create policy "Public Access to study-materials"
-  on storage.objects for select
-  using ( bucket_id = 'study-materials' );
-
--- Allow students to upload study materials into the 'study-materials' bucket
-create policy "Public Uploads to study-materials"
-  on storage.objects for insert
-  with check ( bucket_id = 'study-materials' );
-
-create policy "Public Updates to study-materials"
-  on storage.objects for update
-  using ( bucket_id = 'study-materials' );
-
-create policy "Public Deletes on storage study-materials" on storage.objects for delete
-  using ( bucket_id = 'study-materials' );
-
--- 3. Create 'materials' Table with exact canonical column names
+-- 1. Ensure 'materials' table exists with exact canonical column names
 create table if not exists public.materials (
   id text primary key default gen_random_uuid()::text,
   title text not null,
@@ -67,7 +21,7 @@ create table if not exists public.materials (
   created_at timestamptz not null default now()
 );
 
--- Ensure columns exist in case table was pre-existing
+-- 2. Add any missing columns to existing tables (safe idempotent migrations)
 alter table public.materials add column if not exists title text;
 alter table public.materials add column if not exists paper text;
 alter table public.materials add column if not exists semester text;
@@ -82,10 +36,16 @@ alter table public.materials add column if not exists views integer default 0;
 alter table public.materials add column if not exists likes integer default 0;
 alter table public.materials add column if not exists created_at timestamptz default now();
 
--- Enable RLS on 'materials' table
+-- Optional auxiliary metadata columns for extended storage audit
+alter table public.materials add column if not exists file_path text;
+alter table public.materials add column if not exists file_size bigint default 0;
+alter table public.materials add column if not exists file_type text;
+alter table public.materials add column if not exists public_url text;
+
+-- 3. Enable Row Level Security (RLS)
 alter table public.materials enable row level security;
 
--- Policies for public.materials
+-- Idempotent RLS Policies for public access (Department of Zoology open repository)
 drop policy if exists "Allow public select on materials" on public.materials;
 drop policy if exists "Allow public insert on materials" on public.materials;
 drop policy if exists "Allow public update on materials" on public.materials;
@@ -107,7 +67,51 @@ create policy "Allow public delete on materials"
   on public.materials for delete
   using (true);
 
--- 4. Create 'visitors' Table for honest visitor counter
+-- 4. Create and configure 'study-materials' Storage Bucket
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'study-materials',
+  'study-materials',
+  true,
+  26214400, -- 25 MB in bytes
+  array[
+    'application/pdf',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/jpeg',
+    'image/png',
+    'image/webp'
+  ]
+)
+on conflict (id) do update set
+  public = true,
+  file_size_limit = 26214400;
+
+-- Storage Objects Policies for 'study-materials' bucket
+drop policy if exists "Public Access to study-materials" on storage.objects;
+drop policy if exists "Public Uploads to study-materials" on storage.objects;
+drop policy if exists "Public Updates to study-materials" on storage.objects;
+drop policy if exists "Public Deletes on study-materials" on storage.objects;
+
+create policy "Public Access to study-materials"
+  on storage.objects for select
+  using ( bucket_id = 'study-materials' );
+
+create policy "Public Uploads to study-materials"
+  on storage.objects for insert
+  with check ( bucket_id = 'study-materials' );
+
+create policy "Public Updates to study-materials"
+  on storage.objects for update
+  using ( bucket_id = 'study-materials' );
+
+create policy "Public Deletes on study-materials"
+  on storage.objects for delete
+  using ( bucket_id = 'study-materials' );
+
+-- 5. Visitor counter table
 create table if not exists public.visitors (
   id bigint generated by default as identity primary key,
   visited_at timestamptz not null default now(),
