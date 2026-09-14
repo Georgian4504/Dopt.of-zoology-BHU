@@ -251,6 +251,447 @@
   .card-btn-icon{ background:none; border:none; cursor:pointer; color:var(--ink-soft); padding:6px; font-size:1.1rem; }
   .card-btn-icon:hover{ color:var(--clay-rust); }
 
+  /* ==================================================================== */
+  /* REALISTIC 3D TACTILE BOOKSHELF STYLES */
+  /* ==================================================================== */
+  
+  .bookshelf-cabinet {
+    background: linear-gradient(180deg, #241710 0%, #160e0a 100%);
+    border-radius: 28px;
+    padding: 30px 24px 34px;
+    box-shadow: 0 20px 45px rgba(22, 14, 10, 0.45), inset 0 2px 4px rgba(255,255,255,0.08);
+    border: 8px solid #382415;
+    position: relative;
+    overflow: hidden;
+    margin: 24px 0 32px;
+  }
+
+  .bookshelf-cabinet::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 60px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* Bookshelf Toolbar */
+  .bookshelf-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .bookshelf-filter-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .shelf-filter-btn {
+    background: rgba(255,255,255,0.08);
+    color: #e7dfd5;
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .shelf-filter-btn:hover {
+    background: rgba(255,255,255,0.16);
+    color: #ffffff;
+  }
+
+  .shelf-filter-btn.active {
+    background: var(--clay-rust);
+    color: #ffffff;
+    border-color: var(--clay-rust);
+    box-shadow: 0 2px 8px rgba(181,101,46,0.4);
+  }
+
+  .shelf-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 999px;
+    padding: 6px 14px;
+    color: #e2f0d9;
+    min-width: 220px;
+  }
+
+  .shelf-search-wrap input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #f5f1e2;
+    font-size: 0.82rem;
+    width: 100%;
+  }
+
+  .shelf-search-wrap input::placeholder {
+    color: rgba(245,241,226,0.5);
+  }
+
+  /* Bookshelf Rows & Planks */
+  .bookshelf-row {
+    position: relative;
+    margin-bottom: 40px;
+    padding: 0 4px;
+  }
+
+  .bookshelf-row:last-child {
+    margin-bottom: 12px;
+  }
+
+  /* Wooden Shelf Plank */
+  .bookshelf-plank {
+    height: 22px;
+    background: linear-gradient(180deg, #b07d4b 0%, #87582b 55%, #593718 100%);
+    border-radius: 4px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7), inset 0 2px 2px rgba(255, 255, 255, 0.4);
+    position: relative;
+    margin-top: -3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+  }
+
+  .bookshelf-plank::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 14px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* Brass / Bronze Shelf Plaque */
+  .shelf-nameplate {
+    position: absolute;
+    top: 3px;
+    background: linear-gradient(180deg, #deb841 0%, #b8860b 60%, #856108 100%);
+    color: #1a1002;
+    font-family: 'Fraunces', serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 16px;
+    border-radius: 3px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.7);
+    border: 1px solid #664b04;
+    z-index: 6;
+    white-space: nowrap;
+  }
+
+  /* Track of upright books */
+  .books-track {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    min-height: 220px;
+    padding: 20px 10px 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: thin;
+    scrollbar-color: #87582b #241710;
+  }
+
+  .books-track::-webkit-scrollbar {
+    height: 6px;
+  }
+  .books-track::-webkit-scrollbar-track {
+    background: #241710;
+  }
+  .books-track::-webkit-scrollbar-thumb {
+    background: #87582b;
+    border-radius: 4px;
+  }
+
+  /* Individual 3D Upright Book Spine */
+  .book-spine-item {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, opacity 0.2s ease;
+    transform-origin: bottom center;
+    flex-shrink: 0;
+    z-index: 2;
+  }
+
+  .book-spine-item:hover {
+    transform: translateY(-24px) scale(1.05) rotate(-1deg);
+    z-index: 25;
+  }
+
+  .book-spine-item.highlighted {
+    animation: bookGlow 1.5s ease-in-out infinite alternate;
+    z-index: 10;
+  }
+
+  @keyframes bookGlow {
+    from { filter: drop-shadow(0 0 4px #deb841); }
+    to { filter: drop-shadow(0 0 14px #ffdc73); }
+  }
+
+  .book-spine-item.dimmed {
+    opacity: 0.3;
+    filter: grayscale(40%);
+  }
+
+  /* The physical book spine container */
+  .book-spine {
+    width: 52px;
+    height: 205px;
+    border-radius: 4px 6px 2px 2px;
+    box-shadow: 4px 6px 14px rgba(0,0,0,0.6), inset 2px 0 3px rgba(255,255,255,0.2), inset -3px 0 5px rgba(0,0,0,0.45);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 4px;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* Top paper header */
+  .spine-header-code {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.3);
+    color: #ffffff;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+    text-align: center;
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Spine golden foil rib lines */
+  .spine-rib {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(222,184,65,0.2), rgba(255,235,160,0.85), rgba(222,184,65,0.2));
+    box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+
+  /* Vertical title text running down the spine */
+  .spine-title-vert {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: 'Fraunces', serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 110px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+    text-align: center;
+  }
+
+  /* Scholar at the bottom of spine */
+  .spine-author {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 600;
+    opacity: 0.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 44px;
+    text-align: center;
+  }
+
+  /* Bookmark ribbon */
+  .book-ribbon {
+    position: absolute;
+    top: 0;
+    right: 8px;
+    width: 8px;
+    height: 22px;
+    background: #b91c1c;
+    box-shadow: 1px 2px 4px rgba(0,0,0,0.5);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%);
+    z-index: 3;
+  }
+
+  /* Empty Book Slot (Invite Upload) */
+  .empty-shelf-slot {
+    width: 54px;
+    height: 205px;
+    border: 2px dashed rgba(222, 184, 65, 0.45);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.03);
+    color: rgba(222, 184, 65, 0.75);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    user-select: none;
+    padding: 8px 4px;
+  }
+
+  .empty-shelf-slot:hover {
+    background: rgba(222, 184, 65, 0.12);
+    border-color: #deb841;
+    color: #ffe685;
+    transform: translateY(-8px);
+  }
+
+  .empty-slot-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  /* Book Inspector Modal */
+  .book-inspector-grid {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 28px;
+    align-items: center;
+  }
+
+  @media (max-width: 680px) {
+    .book-inspector-grid {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+  }
+
+  .book-inspector-cover-wrap {
+    display: flex;
+    justify-content: center;
+    perspective: 900px;
+  }
+
+  .hardcover-book {
+    width: 195px;
+    height: 275px;
+    border-radius: 4px 14px 14px 4px;
+    padding: 22px 18px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: -8px 12px 24px rgba(0,0,0,0.5), inset 4px 0 6px rgba(255,255,255,0.25), inset -4px 0 8px rgba(0,0,0,0.4);
+    transform: rotateY(-14deg) rotateX(4deg);
+    transition: transform 0.3s ease;
+    color: #ffffff;
+  }
+
+  .hardcover-book:hover {
+    transform: rotateY(-4deg) rotateX(0deg) translateY(-4px);
+  }
+
+  .book-page-edges {
+    position: absolute;
+    right: -8px;
+    top: 8px;
+    bottom: 8px;
+    width: 10px;
+    background: repeating-linear-gradient(180deg, #fbf7ee 0px, #e8dfc8 2px, #fbf7ee 4px);
+    border-radius: 0 4px 4px 0;
+    box-shadow: inset 1px 0 2px rgba(0,0,0,0.3);
+  }
+
+  .book-cover-paper-badge {
+    align-self: flex-start;
+    background: rgba(0,0,0,0.4);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .book-cover-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    margin: 12px 0;
+  }
+
+  .book-cover-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    margin: 6px 0;
+  }
+
+  .book-cover-seal {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #e2f0d9;
+    opacity: 0.9;
+  }
+
+  .book-cover-author {
+    font-size: 0.76rem;
+    font-style: italic;
+    opacity: 0.85;
+  }
+
+  /* View Mode Switcher */
+  .view-mode-switcher {
+    display: inline-flex;
+    background: var(--sage);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
+    box-shadow: inset 1px 1px 3px var(--shadow-dark), inset -1px -1px 3px var(--shadow-light);
+  }
+
+  .view-mode-btn {
+    border: none;
+    background: transparent;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .view-mode-btn.active {
+    background: var(--clay-rust);
+    color: var(--parchment);
+    box-shadow: 1px 1px 3px var(--shadow-dark);
+  }
+
   /* Paper & Topic Accordions */
   .topic-grid-list{ display:grid; gap:18px; }
   .topic-card{
@@ -445,6 +886,7 @@
       <span class="pulse-dot" id="supabase-status-dot"></span>
       <span id="supabase-status-text">Supabase Cloud</span>
     </button>
+    <a href="#bookshelf-section" style="color:var(--clay-rust); font-weight:700;">📚 Bookshelf</a>
     <a href="#search-dashboard">Search &amp; Stats</a>
     <a href="#contribute">Contribute</a>
     <a href="#syllabus">Syllabus</a>
@@ -463,6 +905,7 @@
 <div class="sem-nav-wrap">
   <div class="sem-nav" id="sem-nav">
     <button class="sem-pill rust" onclick="openUploadModal()" type="button">+ Upload</button>
+    <a class="sem-pill rust" href="#bookshelf-section" style="box-shadow:2px 2px 6px var(--shadow-dark);">📚 Bookshelf</a>
     <button class="sem-pill" onclick="openSupabaseModal()" type="button" style="border-color:rgba(62,207,142,0.5);">⚡ Supabase</button>
     <a class="sem-pill" href="#search-dashboard">🔍 Search &amp; Stats</a>
     <a class="sem-pill" href="#contribute">✎ Contribute</a>
@@ -595,6 +1038,52 @@
           <div class="s-num" id="stat-practicals">0</div>
           <div class="s-lbl">Practicals</div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <!-- 3D INTERACTIVE DEPARTMENT BOOKSHELF -->
+  <!-- ==================================================================== -->
+  <section id="bookshelf-section" class="shelf-sec">
+    <div class="section-head" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
+      <div>
+        <p class="eyebrow-text" style="margin-bottom:8px;">Physical Library Experience</p>
+        <h2>Interactive Zoology Bookshelf</h2>
+        <p>Curated lecture monographs, scholar notes, dissection plates, and exam archives arranged upright on departmental library shelves. Click any book spine to pull it from the shelf and read.</p>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <button class="clay-btn secondary small" onclick="pickRandomBookFromShelf()" type="button" title="Pull a random book from the shelf">
+          🎲 Surprise Me
+        </button>
+        <button class="clay-btn small" onclick="openUploadModal()" type="button">
+          + Place on Shelf
+        </button>
+      </div>
+    </div>
+
+    <!-- The Wooden Bookshelf Cabinet -->
+    <div class="bookshelf-cabinet">
+      <!-- Bookshelf Controls -->
+      <div class="bookshelf-toolbar">
+        <div class="bookshelf-filter-chips" id="shelf-filter-tabs">
+          <button class="shelf-filter-btn active" onclick="filterBookshelf('ALL', this)" type="button">All Shelves (<span id="shelf-total-count">0</span>)</button>
+          <button class="shelf-filter-btn" onclick="filterBookshelf('sem1', this)" type="button">Sem I</button>
+          <button class="shelf-filter-btn" onclick="filterBookshelf('sem2', this)" type="button">Sem II</button>
+          <button class="shelf-filter-btn" onclick="filterBookshelf('sem3', this)" type="button">Sem III</button>
+          <button class="shelf-filter-btn" onclick="filterBookshelf('sem4', this)" type="button">Sem IV</button>
+          <button class="shelf-filter-btn" onclick="filterBookshelf('pyq', this)" type="button">PYQ Exams</button>
+        </div>
+
+        <div class="shelf-search-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="shelf-search-input" placeholder="Spot book on shelf..." oninput="handleBookshelfSearch(this.value)">
+        </div>
+      </div>
+
+      <!-- Bookshelf Rows Container (dynamically populated) -->
+      <div id="bookshelf-rows-container">
+        <!-- Rendered by renderBookshelfCabinet() -->
       </div>
     </div>
   </section>
@@ -864,6 +1353,74 @@
     <div style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
       <button class="clay-btn secondary small" onclick="copyViewerCitation()" type="button">📋 Copy Citation</button>
       <a class="clay-btn small" id="viewer-download-link" href="#" download>⬇ Download Resource</a>
+    </div>
+  </div>
+</div>
+
+<!-- Interactive Book Inspector & Pullout Modal -->
+<div class="modal-backdrop" id="book-inspector-modal" onclick="handleBookInspectorBackdrop(event)">
+  <div class="modal-panel" style="max-width:800px; padding:28px 32px;" role="dialog" aria-labelledby="inspector-book-title">
+    <button class="modal-close" onclick="closeBookInspectorModal()" type="button" aria-label="Close">×</button>
+    <div class="book-inspector-grid">
+      <!-- 3D Realistic Book Cover Preview -->
+      <div class="book-inspector-cover-wrap">
+        <div class="hardcover-book" id="inspector-hardcover">
+          <div class="book-ribbon" style="right:14px; height:32px;"></div>
+          <div class="book-cover-paper-badge" id="inspector-cover-paper">ZOM 101</div>
+          <div class="book-cover-title" id="inspector-cover-title">Biochemistry Monograph</div>
+          <div>
+            <div class="book-cover-divider"></div>
+            <div class="book-cover-seal">🏛️ BHU ZOOLOGY</div>
+            <div class="book-cover-author" id="inspector-cover-author">Scholar Contributor</div>
+          </div>
+          <div class="book-page-edges"></div>
+        </div>
+      </div>
+
+      <!-- Book Metadata & Actions -->
+      <div class="book-inspector-info">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+          <span class="card-type-tag" id="inspector-badge-type" style="position:static; margin:0;">PDF Monograph</span>
+          <span class="topic-badge" id="inspector-badge-semester">Semester I</span>
+          <span class="topic-badge" id="inspector-badge-paper" style="background:var(--clay-putty); font-weight:700;">ZOM 101</span>
+        </div>
+
+        <h2 id="inspector-book-title" style="font-family:'Fraunces', serif; font-size:1.45rem; line-height:1.25; margin:0 0 8px; color:var(--ink);">Book Title</h2>
+        
+        <div style="font-size:0.86rem; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">
+          <div><strong>Syllabus Topic:</strong> <span id="inspector-book-topic">General</span></div>
+          <div><strong>Contributed by:</strong> <span id="inspector-book-student" style="color:var(--clay-rust-dark); font-weight:600;">Scholar</span> · <span id="inspector-book-date">Recent</span></div>
+        </div>
+
+        <div id="inspector-book-desc-box" style="background:var(--sage); border-radius:14px; padding:14px 16px; font-size:0.88rem; color:var(--ink); line-height:1.6; margin-bottom:16px; max-height:150px; overflow-y:auto; box-shadow:inset 1px 1px 4px var(--shadow-dark), inset -1px -1px 4px var(--shadow-light);">
+          <div id="inspector-book-description">Archived digital study record.</div>
+        </div>
+
+        <!-- Metric counter bar -->
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:18px; font-size:0.84rem; color:var(--ink-soft);">
+          <span>👁️ <strong id="inspector-views-count">0</strong> scholars read</span>
+          <span>❤️ <strong id="inspector-likes-count">0</strong> found helpful</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="clay-btn primary" id="inspector-read-btn" onclick="readInspectedBook()" type="button">
+            📖 Open &amp; Read
+          </button>
+          <a class="clay-btn secondary" id="inspector-download-btn" href="#" download>
+            ⬇ Download PDF
+          </a>
+          <button class="clay-btn secondary small" id="inspector-like-btn" onclick="likeInspectedBook()" type="button">
+            ❤️ Like
+          </button>
+          <button class="clay-btn secondary small" id="inspector-fav-btn" onclick="favInspectedBook()" type="button">
+            ★ Favorite
+          </button>
+          <button class="clay-btn secondary small" onclick="copyInspectedCitation()" type="button">
+            📋 Citation
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2150,14 +2707,359 @@ create policy "Allow public insert on visitors"
     });
   }
 
+  /* ==================================================================== */
+  /* 3D INTERACTIVE BOOKSHELF CABINET ENGINE */
+  /* ==================================================================== */
+  const SHELF_DEFINITIONS = [
+    {
+      id: 'sem1',
+      title: 'Shelf I · Semester I (Foundation & Biochemistry)',
+      filter: (m) => m.semester === 'sem1',
+      emptyText: 'No books on Semester I shelf yet.'
+    },
+    {
+      id: 'sem2',
+      title: 'Shelf II · Semester II (Chordata & Genetics)',
+      filter: (m) => m.semester === 'sem2',
+      emptyText: 'No books on Semester II shelf yet.'
+    },
+    {
+      id: 'sem3',
+      title: 'Shelf III · Semester III (Cell Biology, Neuro & Special Papers)',
+      filter: (m) => m.semester === 'sem3',
+      emptyText: 'No books on Semester III shelf yet.'
+    },
+    {
+      id: 'sem4',
+      title: 'Shelf IV · Semester IV (Ecology, Endocrinology & Specialization)',
+      filter: (m) => m.semester === 'sem4',
+      emptyText: 'No books on Semester IV shelf yet.'
+    },
+    {
+      id: 'pyq',
+      title: 'Shelf V · Examination Archives & Dissection Plates',
+      filter: (m) => m.type === 'Past Paper' || m.type === 'Practical',
+      emptyText: 'No examination papers archived on this shelf yet.'
+    }
+  ];
+
+  let activeInspectedBook = null;
+  let activeBookshelfFilter = 'ALL';
+  let activeBookshelfSearch = '';
+
+  function getBookCoverStyle(item) {
+    const paper = (item.paper || '').toUpperCase();
+    const type = (item.type || '').toLowerCase();
+    
+    // Hash-based subtle variation for authentic academic variety
+    let hash = 0;
+    const s = String(item.id) + String(item.title);
+    for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) % 1000;
+    const height = 196 + (hash % 24); // 196px to 220px
+    const width = 50 + (hash % 14);   // 50px to 64px
+
+    if (type.includes('paper') || paper.includes('PYQ')) {
+      return {
+        bg: 'linear-gradient(90deg, #3d2817 0%, #684627 50%, #29180c 100%)',
+        textColor: '#ffd700',
+        ribbonColor: '#b8860b',
+        height, width
+      };
+    }
+    if (paper.includes('101') || paper.includes('NON-CHORDATA')) {
+      return {
+        bg: 'linear-gradient(90deg, #0d2818 0%, #1b4332 50%, #081c15 100%)',
+        textColor: '#d8f3dc',
+        ribbonColor: '#deb841',
+        height, width
+      };
+    }
+    if (paper.includes('102') || paper.includes('BIOCHEM')) {
+      return {
+        bg: 'linear-gradient(90deg, #38040e 0%, #670d22 50%, #250208 100%)',
+        textColor: '#ffb3c1',
+        ribbonColor: '#e0a96d',
+        height, width
+      };
+    }
+    if (paper.includes('201') || paper.includes('CHORDATA')) {
+      return {
+        bg: 'linear-gradient(90deg, #0b1d3a 0%, #183b6b 50%, #071326 100%)',
+        textColor: '#caf0f8',
+        ribbonColor: '#c1121f',
+        height, width
+      };
+    }
+    if (paper.includes('202') || paper.includes('GENETICS')) {
+      return {
+        bg: 'linear-gradient(90deg, #2b0938 0%, #521968 50%, #190422 100%)',
+        textColor: '#e8c5f8',
+        ribbonColor: '#e0a96d',
+        height, width
+      };
+    }
+    if (item.semester === 'sem3') {
+      return {
+        bg: 'linear-gradient(90deg, #441407 0%, #7c2d12 50%, #2c0b03 100%)',
+        textColor: '#fed7aa',
+        ribbonColor: '#38bdf8',
+        height, width
+      };
+    }
+    if (item.semester === 'sem4') {
+      return {
+        bg: 'linear-gradient(90deg, #1c2e17 0%, #365314 50%, #111d0e 100%)',
+        textColor: '#d9f99d',
+        ribbonColor: '#f59e0b',
+        height, width
+      };
+    }
+    return {
+      bg: 'linear-gradient(90deg, #2a1f1d 0%, #4a3834 50%, #1a1211 100%)',
+      textColor: '#f5f1e2',
+      ribbonColor: '#c1121f',
+      height, width
+    };
+  }
+
+  function renderBookSpineHTML(item, isMatch, hasFilter) {
+    const style = getBookCoverStyle(item);
+    const classes = ['book-spine-item'];
+    if (hasFilter) {
+      if (isMatch) classes.push('highlighted');
+      else classes.push('dimmed');
+    }
+
+    const shortAuthor = (item.student || '').split(' ')[0] || 'Scholar';
+
+    return `
+      <div class="${classes.join(' ')}" 
+           id="book-spine-${escapeAttr(item.id)}" 
+           onclick="inspectBook('${escapeAttr(item.id)}')" 
+           title="${escapeAttr(item.title)} (${escapeAttr(item.paper || '')}) - Click to pull from shelf">
+        <div class="book-spine" style="background:${style.bg}; color:${style.textColor}; height:${style.height}px; width:${style.width}px;">
+          <div class="book-ribbon" style="background:${style.ribbonColor};"></div>
+          <div class="spine-header-code">${escapeHtml(item.paper || item.type)}</div>
+          <div class="spine-rib"></div>
+          <div class="spine-title-vert">${escapeHtml(item.title)}</div>
+          <div class="spine-rib"></div>
+          <div class="spine-author">👤 ${escapeHtml(shortAuthor)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderEmptyShelfSlot(semId) {
+    return `
+      <div class="empty-shelf-slot" onclick="openUploadModal('${escapeAttr(semId || 'sem1')}')" title="Place your study notes or paper onto this shelf">
+        <span style="font-size:1.4rem;">+</span>
+        <span class="empty-slot-label">Add to Shelf</span>
+      </div>
+    `;
+  }
+
+  function renderBookshelfCabinet(filter = activeBookshelfFilter, query = activeBookshelfSearch) {
+    const container = document.getElementById('bookshelf-rows-container');
+    const totalCountEl = document.getElementById('shelf-total-count');
+    if (!container) return;
+
+    if (totalCountEl) {
+      totalCountEl.textContent = allMaterials.length;
+    }
+
+    const q = (query || '').trim().toLowerCase();
+    const hasSearch = q.length > 0;
+
+    let shelvesToShow = SHELF_DEFINITIONS;
+    if (filter !== 'ALL') {
+      shelvesToShow = SHELF_DEFINITIONS.filter(s => s.id === filter);
+    }
+
+    let html = '';
+
+    shelvesToShow.forEach(shelf => {
+      const shelfBooks = allMaterials.filter(shelf.filter);
+      
+      let booksHtml = '';
+      if (shelfBooks.length > 0) {
+        booksHtml = shelfBooks.map(b => {
+          const isMatch = !hasSearch || (
+            (b.title && b.title.toLowerCase().includes(q)) ||
+            (b.paper && b.paper.toLowerCase().includes(q)) ||
+            (b.topic && b.topic.toLowerCase().includes(q)) ||
+            (b.student && b.student.toLowerCase().includes(q))
+          );
+          return renderBookSpineHTML(b, isMatch, hasSearch);
+        }).join('');
+      }
+
+      // Append invite slot on every shelf
+      booksHtml += renderEmptyShelfSlot(shelf.id);
+
+      html += `
+        <div class="bookshelf-row" id="shelf-row-${shelf.id}">
+          <div class="books-track">
+            ${booksHtml}
+          </div>
+          <div class="bookshelf-plank">
+            <div class="shelf-nameplate">
+              ${shelf.title} · (${shelfBooks.length} Books)
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function filterBookshelf(sem, btnEl) {
+    activeBookshelfFilter = sem;
+    const tabs = document.querySelectorAll('#shelf-filter-tabs .shelf-filter-btn');
+    tabs.forEach(t => t.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    renderBookshelfCabinet(activeBookshelfFilter, activeBookshelfSearch);
+  }
+
+  function handleBookshelfSearch(query) {
+    activeBookshelfSearch = query;
+    renderBookshelfCabinet(activeBookshelfFilter, activeBookshelfSearch);
+  }
+
+  function pickRandomBookFromShelf() {
+    if (!allMaterials || allMaterials.length === 0) {
+      showToast('No books currently on the shelf.');
+      return;
+    }
+    const randIndex = Math.floor(Math.random() * allMaterials.length);
+    const picked = allMaterials[randIndex];
+    showToast(`🎲 Pulled "${picked.title}" from shelf!`);
+    inspectBook(picked.id);
+  }
+
+  function inspectBook(id) {
+    const item = allMaterials.find(m => String(m.id) === String(id));
+    if (!item) return;
+
+    activeInspectedBook = item;
+
+    // Increment view count
+    materialViews[item.id] = (materialViews[item.id] || item.views || 0) + 1;
+    localStorage.setItem(STORAGE_KEY_VIEWS, JSON.stringify(materialViews));
+
+    // Update Supabase if connected
+    if (supabaseClient) {
+      supabaseClient.from('materials').update({ views: materialViews[item.id] }).eq('id', item.id).then(() => {});
+    }
+
+    const style = getBookCoverStyle(item);
+    const modal = document.getElementById('book-inspector-modal');
+    if (!modal) return;
+
+    // 3D Cover elements
+    const coverEl = document.getElementById('inspector-hardcover');
+    if (coverEl) {
+      coverEl.style.background = style.bg;
+    }
+    const coverPaper = document.getElementById('inspector-cover-paper');
+    if (coverPaper) coverPaper.textContent = item.paper || item.type;
+    const coverTitle = document.getElementById('inspector-cover-title');
+    if (coverTitle) coverTitle.textContent = item.title;
+    const coverAuthor = document.getElementById('inspector-cover-author');
+    if (coverAuthor) coverAuthor.textContent = 'By ' + (item.student || 'Department Scholar');
+
+    // Details elements
+    document.getElementById('inspector-book-title').textContent = item.title;
+    document.getElementById('inspector-badge-type').textContent = item.type;
+    document.getElementById('inspector-badge-semester').textContent = (item.semester || '').toUpperCase();
+    document.getElementById('inspector-badge-paper').textContent = item.paper || 'General';
+    document.getElementById('inspector-book-topic').textContent = item.topic || 'Core Curriculum';
+    document.getElementById('inspector-book-student').textContent = item.student || 'Department Scholar';
+    document.getElementById('inspector-book-date').textContent = item.date || 'Recent';
+    document.getElementById('inspector-book-description').textContent = item.description || 'Academic study material uploaded to the Department of Zoology digital collection.';
+
+    const views = (materialViews[item.id] !== undefined) ? materialViews[item.id] : (item.views || 0);
+    const likes = (materialLikes[item.id] !== undefined) ? materialLikes[item.id] : (item.likes || 0);
+    document.getElementById('inspector-views-count').textContent = views;
+    document.getElementById('inspector-likes-count').textContent = likes;
+
+    // Download button
+    const downloadBtn = document.getElementById('inspector-download-btn');
+    if (downloadBtn) {
+      const targetUrl = item.file || item.image || '#';
+      downloadBtn.href = targetUrl;
+      downloadBtn.onclick = (e) => {
+        if (!item.file && !item.image) {
+          e.preventDefault();
+          showToast('No downloadable file attached.');
+        } else {
+          downloadMaterial(item.id);
+        }
+      };
+    }
+
+    // Favorite button state
+    const favBtn = document.getElementById('inspector-fav-btn');
+    if (favBtn) {
+      favBtn.textContent = savedFavorites.has(item.id) ? '★ Favorited' : '☆ Favorite';
+    }
+
+    modal.classList.add('open');
+  }
+
+  function closeBookInspectorModal() {
+    const modal = document.getElementById('book-inspector-modal');
+    if (modal) modal.classList.remove('open');
+  }
+
+  function handleBookInspectorBackdrop(e) {
+    if (e.target.id === 'book-inspector-modal') {
+      closeBookInspectorModal();
+    }
+  }
+
+  function readInspectedBook() {
+    if (!activeInspectedBook) return;
+    const item = activeInspectedBook;
+    closeBookInspectorModal();
+    openViewer(item.id);
+  }
+
+  function likeInspectedBook() {
+    if (!activeInspectedBook) return;
+    likeMaterial(activeInspectedBook.id);
+    const likes = (materialLikes[activeInspectedBook.id] !== undefined) ? materialLikes[activeInspectedBook.id] : (activeInspectedBook.likes || 0);
+    document.getElementById('inspector-likes-count').textContent = likes;
+  }
+
+  function favInspectedBook() {
+    if (!activeInspectedBook) return;
+    toggleFavorite(activeInspectedBook.id);
+    const favBtn = document.getElementById('inspector-fav-btn');
+    if (favBtn) {
+      favBtn.textContent = savedFavorites.has(activeInspectedBook.id) ? '★ Favorited' : '☆ Favorite';
+    }
+  }
+
+  function copyInspectedCitation() {
+    if (!activeInspectedBook) return;
+    const citation = `${activeInspectedBook.student}. (${activeInspectedBook.date || '2024'}). "${activeInspectedBook.title}". MSc Zoology Study Repository, Department of Zoology, Banaras Hindu University.`;
+    navigator.clipboard.writeText(citation).then(() => {
+      showToast('📋 Citation copied to clipboard!');
+    }).catch(() => {
+      showToast('Citation: ' + citation);
+    });
+  }
+
   function rerenderShelves() {
+    renderBookshelfCabinet();
     renderAllSemesters();
     renderMuseum();
     renderAtlas();
     renderPYQArchive();
     renderPDFLibrary();
     updateStatsDashboard();
-    if (document.getElementById('live-search-input').value.trim() || currentTypeFilter !== 'ALL') {
+    if (document.getElementById('live-search-input') && (document.getElementById('live-search-input').value.trim() || currentTypeFilter !== 'ALL')) {
       handleSearch();
     }
   }
@@ -2181,6 +3083,8 @@ create policy "Allow public insert on visitors"
     if (e.key === 'Escape') {
       closeUploadModal();
       closeViewerModal();
+      closeBookInspectorModal();
+      closeSupabaseModal();
     }
   });
 </script>
